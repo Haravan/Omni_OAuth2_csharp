@@ -1,0 +1,14 @@
+/.vs
+/*/*/bin
+/*/*/obj
+*.user
+/src/*/node_modules
+/src/*/.vs/*/v15
+/ngrok.exe
+.DS_Store
+antifacts
+*.userprefs
+*.min.js
+*.min.css
+/bin
+/obj
