@@ -19,28 +19,17 @@ namespace HaravanAuthorization.Controllers
             clientSecret = "cac97ec3b4414b066acd665d3cc3571a4cd216925d3bbafdf642d770126e19b5";
         }
 
-        private string HashHmacSHA1(string originalData, string secretKey)
+        public static string HashHmacSHA256(string body, string secretKey)
         {
-            var sha1 = null as byte[];
-
-            using (var crypto = new HMACSHA1(Encoding.UTF8.GetBytes(secretKey)))
-                sha1 = crypto.ComputeHash(Encoding.UTF8.GetBytes(originalData));
-
-            var hashString = new StringBuilder();
-
-            foreach (var b in sha1)
-                hashString.Append(b.ToString("x2"));
-
-            var result = hashString.ToString();
-
-            return result;
+            var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secretKey));
+            return Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(body)));
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             var request = context.HttpContext.Request;
 
-            var hmac = (string)request.Headers["X-Haravan-Hmac-Sha256"];
+            var hmac = (string)request.Headers["X-Haravan-HmacSha256"];
 
             if (string.IsNullOrWhiteSpace(hmac))
             {
@@ -52,7 +41,7 @@ namespace HaravanAuthorization.Controllers
             {
                 var body_string = await reader.ReadToEndAsync();
 
-                var signature = HashHmacSHA1(body_string, clientSecret);
+                var signature = HashHmacSHA256(body_string, clientSecret);
 
                 if (signature != hmac)
                 {
